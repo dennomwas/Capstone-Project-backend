@@ -22,6 +22,6 @@ const userSchema = new Schema({
     }
 });
 
-const forecastData = mongoose.model('forecastData', forecastSchema);
+const userSchema = mongoose.model('forecastData', userSchema);
 
-module.exports.forecastData = forecastData
+module.exports.userSchema = userSchema;
