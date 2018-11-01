@@ -21,6 +21,10 @@ db.once('open', () => {
     console.log('db connection successful!')
 });
 
+// include routes
+const routes = require('./routes/index');
+app.use('/', routes);
+
 // Handle 404 errors
 app.use((req, res, next) => {
     const err = new Error(" Not Found");
