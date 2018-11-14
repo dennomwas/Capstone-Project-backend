@@ -9,7 +9,9 @@ const app = express();
 app.use(jsonParser());
 
 // Db connection using mongoose
-mongoose.connect('mongodb://localhost:27017/capstone-project', { useNewUrlParser: true });
+mongoose.connect('mongodb://localhost:27017/capstone-project-db', {
+    useNewUrlParser: true
+});
 const db = mongoose.connection;
 
 db.on('error', (err) => {
@@ -27,11 +29,11 @@ app.use((req, res, next) => {
 });
 
 // Error handler
-app.use((err, res, req, next) => {
+app.use((err, req, res, next) => {
     res.status(err.status || 500);
     res.json({
-        error: { 
-            message: err.message 
+        error: {
+            message: err.message
         }
     });
 });
@@ -40,5 +42,5 @@ app.use((err, res, req, next) => {
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
-    console.log('Express server is listening on localhost:',port)
+    console.log('Express server is listening on localhost:', port)
 });
