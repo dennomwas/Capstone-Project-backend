@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
+const bcrypt = require('bcrypt');
 
 const UserSchema = new Schema({
     firstName: {
@@ -22,18 +22,11 @@ const UserSchema = new Schema({
         trim: true
     },
     password: {
-        required: [true, 'A Password is required'],
+        type: String,
+        required: [true, 'A Password is Required'],
         trim: true
     },
-    passwordConfirmation: {
-        required: [true, 'Password confirmation is required'],
-        trim: true
-    }
 });
-
-const userSchema = mongoose.model('forecastData', userSchema);
-
-module.exports.userSchema = userSchema;
 
 // check if user exists
 UserSchema.statics.authenticate = (email, password, callback) => {
@@ -41,13 +34,18 @@ UserSchema.statics.authenticate = (email, password, callback) => {
         email: email
     }).exec((error, user) => {
         if (error) {
-            return callback(error)
+            return callback(error);
         } else if (!user) {
             const err = new Error('User not found!')
             err.status = 401;
             return callback(err);
         };
-
+        bcrypt.compare(password, user.password, (error, result) => {
+            if (result === true) {
+                return callback(null, user)
+            }
+            return callback(error, null);
+        });
     });
 };
 
@@ -59,9 +57,9 @@ UserSchema.pre('save', function (next) {
             return next(err);
         }
         user.password = hash;
-        next();
+        return next();
     })
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', UserSchema);
 module.exports = User;

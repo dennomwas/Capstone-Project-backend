@@ -24,9 +24,8 @@ router.post('/register', (req, res, next) => {
         lastName,
         email,
         password,
-        confirmPassword,
     } = req.body;
-    if (firstName && lastName && email && password && confirmPassword) {
+    if (firstName && lastName && email && password) {
         // check if email already exists
         User.findOne({
             email
@@ -37,30 +36,24 @@ router.post('/register', (req, res, next) => {
                 });
             };
         });
-        // // check if passwords match
-        if (password !== confirmPassword) {
-            return res.status(400).send({
-                error: "Passwords Must Match"
-            });
-        };
         //create user object
         const userData = {
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            password: password
+            firstName,
+            lastName,
+            email,
+            password
         }
         // insert document into mongo
         User.create(userData, error => {
             if (error) {
-                return error;
+                return next(error);
             }
             return res.status(200).send({
                 token: auth.generateAuthToken({
                     userData
                 }),
                 message: 'success'
-            })
+            });
         });
     } else {
         const err = new Error('All fields are required!');
@@ -75,32 +68,29 @@ router.get('/login', (req, res) => {
     })
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', (req, res, next) => {
     const {
         email,
         password,
     } = req.body
-    const token = req.headers['authorization']
-    if (token) {
-        return res.redirect(302, '/');
-    }
     if (email && password) {
+
         User.authenticate(email, password, (error, user) => {
             if (error || !user) {
-                return res.status(401).status({
-                    error,
-                    message: 'Wrong Email/Password Combination!'
-                });
+                const err = new Error('Wrong Email/Password Combination!')
+                err.status = 401;
+                return next(err);
             }
             return res.status(200).send({
                 token: auth.generateAuthToken(user.toJSON()),
                 message: 'success'
             });
         });
+    } else {
+        const err = new Error("Email/Password must be provided");
+        err.status = 401;
+        return next(err);
     }
-    return res.status(401).send({
-        message: 'Please Enter Email and Password'
-    });
 });
 
 module.exports = router;

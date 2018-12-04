@@ -9,7 +9,7 @@ const app = express();
 app.use(jsonParser());
 
 // Db connection using mongoose
-mongoose.connect('mongodb://localhost:27017/capstone-project-db', {
+mongoose.connect( process.env.MONGODB_URI || 'mongodb://localhost:27017/capstone-project-db', {
     useNewUrlParser: true
 });
 const db = mongoose.connection;
@@ -38,8 +38,9 @@ app.use((err, req, res, next) => {
     res.json({
         error: {
             message: err.message
-        }
+        },
     });
+    return next();
 });
 
 // define server port
@@ -48,3 +49,5 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log('Express server is listening on localhost:', port)
 });
+
+module.exports = app;
